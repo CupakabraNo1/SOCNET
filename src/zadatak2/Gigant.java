@@ -67,7 +67,8 @@ public class Gigant <V,E> {
 	
 	public double percent() {
 		double perc=0.0;
-		perc=(100*giga.size())/graphSize;
+		if(giga!=null)
+			perc=(double)(100*giga.size())/(double)graphSize;
 		return perc;
 	}
 	

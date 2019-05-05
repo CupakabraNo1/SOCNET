@@ -40,7 +40,7 @@ public class MetricData<V,E> {
 	}
 	
 	public UndirectedSparseGraph<V, E> getGraph(){
-		return graph;
+		return clone(graph);
 	}
 	public double getDs(V v) {
 		return ds.getVertexScore(v);
@@ -84,7 +84,9 @@ public class MetricData<V,E> {
 	}
 	
 	public static <V,E> EigenvectorCentrality<V, E> eigen (UndirectedSparseGraph<V, E> graph){
-		return new EigenvectorCentrality<V, E>(graph);
+		EigenvectorCentrality<V, E> eigen=new EigenvectorCentrality<V, E>(graph);
+		eigen.evaluate();
+		return eigen;
 	}
 	
 }

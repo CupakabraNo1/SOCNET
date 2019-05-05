@@ -8,8 +8,12 @@ import java.util.Comparator;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.stream.Collectors;
+
+import org.apache.commons.collections15.map.HashedMap;
 
 import edu.uci.ics.jung.algorithms.scoring.BetweennessCentrality;
 import edu.uci.ics.jung.algorithms.scoring.ClosenessCentrality;
@@ -27,8 +31,8 @@ public class Decomposition <V,E>{
 	public Decomposition(UndirectedSparseGraph<V, E> graph) throws IOException {
 		this.graph=graph;
 		data=new MetricData(graph);
-		System.out.println("a");
-//		decomposition();
+		System.out.println("Metric data calculated, procesing decomposition...");
+		decomposition();
 	}
 	
 	class Data{
@@ -44,69 +48,59 @@ public class Decomposition <V,E>{
 		}
 		
 		public String format() {
-			return String.format("%d,%2.3f%%,%2.3f%%,%2.3f%%,%2.3f%%%n", row,sd,sb,sc,se);
+			return String.format("%d,%2.3f%%,%2.3f%%,%2.3f%%,%2.3f%%%n",row,sd,sb,sc,se);
 		}
 	}
 	
 	public void decomposition() throws IOException {
+		
+		List<V>orderD=formOrder(Metrics.DEGREE);
+		List<V>orderB=formOrder(Metrics.BETWEENNESS);
+		List<V>orderC=formOrder(Metrics.CLOSENESS);
+		List<V>orderE=formOrder(Metrics.EIGEN);
+		
 		UndirectedSparseGraph<V, E> dummy=data.getGraph();
-		Collection<E> neighbours=null;
+		Map<Integer,Double> degreeDecomp=decomp(dummy,orderD);
+		System.out.println("Degree decomposition calculated.");
+		dummy=data.getGraph();
+		Map<Integer,Double> betweennessDecomp=decomp(dummy,orderB);
+		System.out.println("Betweenness decomposition calculated.");
+		dummy=data.getGraph();
+		Map<Integer,Double> closenessDecomp=decomp(dummy,orderC);
+		System.out.println("Closeness decomposition calculated.");
+		dummy=data.getGraph();
+		Map<Integer,Double> eigenDecomp=decomp(dummy,orderE);
+		System.out.println("Eigen decomposition calculated.");
 		
-		List<V>orderD=new LinkedList<V>();
-		List<V>orderB=new LinkedList<V>();
-		List<V>orderC=new LinkedList<V>();
-		List<V>orderE=new LinkedList<V>();
-		
-		orderD=formOrder(Metrics.DEGREE);
-		orderB=formOrder(Metrics.BETWEENNESS);
-		orderC=formOrder(Metrics.CLOSENESS);
-		orderE=formOrder(Metrics.EIGEN);
-		
-		BufferedWriter writer=new BufferedWriter(new FileWriter("data.csv"));
-		writer.append("F,DS,BS,CS,ES\n");
-		for(int index=0;index<graph.getVertexCount();index++) {
-			Data data=new Data(index);
-			double perc=0.0;
-			
-			//by degree
-			V v=orderD.get(index);
-			neighbours.addAll(dummy.getIncidentEdges(v));
-			dummy.removeVertex(v);
-			
-			Gigant<V, E> gigant=new Gigant<V, E>(graph);
-			perc=gigant.percent();
-			data.sd=perc;
-			dummy.addVertex(v);
-			
-			
-			
-			//by betweenness
-			v=orderB.get(index);
-			graph.removeVertex(v);
-			gigant=new Gigant<V, E>(graph);
-			perc=gigant.percent();
-			data.sd=perc;
-			
-			//by closeness
-			graph.addVertex(v);
-			v=orderC.get(index);
-			graph.removeVertex(v);
-			gigant=new Gigant<V, E>(graph);
-			perc=gigant.percent();
-			data.sd=perc;
-			graph.addVertex(v);
-			
-			//by eigen
-			v=orderE.get(index);
-			graph.removeVertex(v);
-			gigant=new Gigant<V, E>(graph);
-			perc=gigant.percent();
-			data.sd=perc;
-			graph.addVertex(v);
-			
-			writer.append(data.format());
+//		BufferedWriter writer=new BufferedWriter(new FileWriter("data.csv"));
+//		writer.append("F,DS,BS,CS,ES\n");
+		System.out.println("F,DS,BS,CS,ES/n");
+		for(int i=0; i<orderD.size(); i++) {
+			Data data=new Data(i+1);
+			data.sd=degreeDecomp.get(i+1);
+			data.sb=betweennessDecomp.get(i+1);
+			data.sc=closenessDecomp.get(i+1);
+			data.se=eigenDecomp.get(i+1);
+//			writer.append(data.format());
+//			System.out.println(i+","+data.sd+"%,"+data.sb+"%,"+data.sc+"%,"+data.se+"%");
+			System.out.println(data.format());
 		}
 		System.out.println("Decomposition completed your data can be found in file \"data.csv\"");
+	}
+	
+	private TreeMap<Integer,Double> decomp(UndirectedSparseGraph<V,E> dummy, List<V> order){
+		TreeMap<Integer,Double> map=new TreeMap();
+		int position=0;
+		double perc=0.0;
+		Gigant<V, E> giga=null;
+		for(V v:order) {
+			position=order.indexOf(v);
+			dummy.removeVertex(v);
+		    giga=new Gigant(dummy);
+			perc=giga.percent();
+			map.put(position+1,perc);
+		}
+		return map;
 	}
 
 	private List<V> formOrder(Metrics m) {
@@ -123,6 +117,8 @@ public class Decomposition <V,E>{
 			return null;
 		}		
 	}
+	
+	
 	
 	public Set<V> collect(){
 		int number=(graph.getVertexCount()*10)/100;

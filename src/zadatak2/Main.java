@@ -13,9 +13,9 @@ public class Main {
 			
 			//filtering the giga component
 			Graph g2=g.filter(giga);
-			
+			System.out.println("Gigant component of original graph have "+g2.getGraph().getVertexCount()+" nodes");
 			//Pearsons and Spearmans corelation
-//			System.out.println("Calculating...");
+			System.out.println("Calculating...");
 //			Corelation<Integer, String> cor=new Corelation(g2.getGraph());
 //			cor.calculate(Metrics.EIGEN);
 //			System.out.println("Pearsons corelation for eigen is "+String.format("%1.3f",cor.getPearsons()));
