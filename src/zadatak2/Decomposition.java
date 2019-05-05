@@ -3,9 +3,12 @@ package zadatak2;
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.Collection;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import edu.uci.ics.jung.algorithms.scoring.BetweennessCentrality;
@@ -18,44 +21,17 @@ import edu.uci.ics.jung.graph.util.Pair;
 public class Decomposition <V,E>{
 	
 	private UndirectedSparseGraph<V, E> graph;
+	private MetricData<V, E> data;
 	
-	
-	DegreeScorer<V> ds;
-	BetweennessCentrality<V, E> bc;
-	ClosenessCentrality<V, E> cc;
-	EigenvectorCentrality<V, E> ec;
 	
 	public Decomposition(UndirectedSparseGraph<V, E> graph) throws IOException {
-		this.graph=clone(graph);
+		this.graph=graph;
+		data=new MetricData(graph);
 		System.out.println("a");
-		centralitis();
-		System.out.println("b");
-		
-		decomposition();
-	}
-
-	public UndirectedSparseGraph<V,E> clone(UndirectedSparseGraph<V,E> forCloning){
-		UndirectedSparseGraph<V,E> clone=new UndirectedSparseGraph<V,E>();
-		for(V v:forCloning.getVertices()) {
-			clone.addVertex(v);
-		}
-		
-		for(E e:forCloning.getEdges()) {
-			Pair<V> pair=forCloning.getEndpoints(e);
-			clone.addEdge(e, pair.getFirst(), pair.getSecond());
-		}
-		return clone;	
-	}
-
-	private void centralitis() {
-		ds=new DegreeScorer<V>(graph);
-//		bc=new BetweennessCentrality<V,E>(graph);
-//		cc=new ClosenessCentrality<V,E>(graph);
-//		ec=new EigenvectorCentrality<V,E>(graph);
-		
+//		decomposition();
 	}
 	
-	static class Data{
+	class Data{
 		int row;
 		double sd,sb,sc,se;
 		
@@ -73,6 +49,9 @@ public class Decomposition <V,E>{
 	}
 	
 	public void decomposition() throws IOException {
+		UndirectedSparseGraph<V, E> dummy=data.getGraph();
+		Collection<E> neighbours=null;
+		
 		List<V>orderD=new LinkedList<V>();
 		List<V>orderB=new LinkedList<V>();
 		List<V>orderC=new LinkedList<V>();
@@ -88,13 +67,18 @@ public class Decomposition <V,E>{
 		for(int index=0;index<graph.getVertexCount();index++) {
 			Data data=new Data(index);
 			double perc=0.0;
+			
 			//by degree
 			V v=orderD.get(index);
-			graph.removeVertex(v);
+			neighbours.addAll(dummy.getIncidentEdges(v));
+			dummy.removeVertex(v);
+			
 			Gigant<V, E> gigant=new Gigant<V, E>(graph);
 			perc=gigant.percent();
 			data.sd=perc;
-			graph.addVertex(v);
+			dummy.addVertex(v);
+			
+			
 			
 			//by betweenness
 			v=orderB.get(index);
@@ -128,19 +112,26 @@ public class Decomposition <V,E>{
 	private List<V> formOrder(Metrics m) {
 		switch (m) {
 		case DEGREE: 
-			return graph.getVertices().stream().sorted(Comparator.comparing(x->-ds.getVertexScore(x))).collect(Collectors.toList());
-//		case BETWEENNESS:
-//			return graph.getVertices().stream().sorted(Comparator.comparing(x->-bc.getVertexScore(x))).collect(Collectors.toList());
-//		case CLOSENESS:
-//			return graph.getVertices().stream().sorted(Comparator.comparing(x->-cc.getVertexScore(x))).collect(Collectors.toList());	
-//		case EIGEN:
-//			return graph.getVertices().stream().sorted(Comparator.comparing(x->-ec.getVertexScore(x))).collect(Collectors.toList());
+			return graph.getVertices().stream().sorted(Comparator.comparing(x->-data.getDs(x))).collect(Collectors.toList());	
+		case BETWEENNESS:
+			return graph.getVertices().stream().sorted(Comparator.comparing(x->-data.getBc(x))).collect(Collectors.toList());
+		case CLOSENESS:
+			return graph.getVertices().stream().sorted(Comparator.comparing(x->-data.getCc(x))).collect(Collectors.toList());	
+		case EIGEN:
+			return graph.getVertices().stream().sorted(Comparator.comparing(x->-data.getEc(x))).collect(Collectors.toList());
 		default:
 			return null;
-		}
-//		
+		}		
 	}
 	
-	
+	public Set<V> collect(){
+		int number=(graph.getVertexCount()*10)/100;
+		List<V> list=formOrder(Metrics.BETWEENNESS);
+		Set<V> output=new HashSet<V>();
+		for(V v:list)
+			if(output.size()<=number) output.add(v);
+		return output;
+	}
 	
 }
+

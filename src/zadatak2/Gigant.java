@@ -6,6 +6,7 @@ import java.util.Set;
 
 
 import edu.uci.ics.jung.graph.UndirectedSparseGraph;
+import edu.uci.ics.jung.graph.util.Pair;
 
 public class Gigant <V,E> {
 	
@@ -70,5 +71,32 @@ public class Gigant <V,E> {
 		return perc;
 	}
 	
+	public int numberOfComponents() {
+		return components.size();
+	}
+	
+	public int numberOfOEComponents() {
+		return (int)components.stream().filter(x->x.size()==1).count();
+	}
+	
+	public int isolated() {
+		return (int) components.stream()
+				.filter(x->x.size()==1)
+				.flatMap(x->x.stream())
+				.filter(v->graph.getIncidentEdges(v).size()==0)
+				.count();
+	}
+	
+	public int[] gigaStats() {
+		int[] stats=new int[2];
+		stats[0]=giga.size();
+		int counter=0;
+		for(E e:graph.getEdges()) {
+			Pair<V> pair=graph.getEndpoints(e);
+			if(giga.contains(pair.getFirst())&&giga.contains(pair.getSecond())) counter++;
+		}
+		stats[1]=counter;
+		return stats;
+	}
 	
 }

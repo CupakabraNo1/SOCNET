@@ -41,7 +41,7 @@ public class Graph {
 		
 	}
 	
-	public Graph filter(Set<Integer> giga) throws IOException {
+	public static Graph filter(Set<Integer> giga) throws IOException {
 		Graph g=new Graph();
 		UndirectedSparseGraph<Integer, String> usg=new UndirectedSparseGraph<Integer, String>();
 		for(Integer v:giga) {
@@ -57,15 +57,6 @@ public class Graph {
 		return g;
 	}
 	
-//	public static Graph clone(Graph g) {
-//		Graph clone=new Graph();
-//		UndirectedSparseGraph<Integer, String> usg=new UndirectedSparseGraph<Integer, String>();
-//		g.getGraph().getVertices().stream()
-//			.forEach(x->usg.addVertex(x));
-//		g.getGraph().getEdges().stream()
-//			.map(x->g.getGraph().getEndpoints(x))
-//			
-//	}
 	@Override
 	public String toString() {
 		StringBuilder builder=new StringBuilder();

@@ -2,24 +2,16 @@ package zadatak2;
 
 import org.apache.commons.math3.stat.correlation.PearsonsCorrelation;
 import org.apache.commons.math3.stat.correlation.SpearmansCorrelation;
-
-import edu.uci.ics.jung.algorithms.scoring.BetweennessCentrality;
-import edu.uci.ics.jung.algorithms.scoring.ClosenessCentrality;
-import edu.uci.ics.jung.algorithms.scoring.DegreeScorer;
-import edu.uci.ics.jung.algorithms.scoring.EigenvectorCentrality;
 import edu.uci.ics.jung.graph.UndirectedSparseGraph;
 import edu.uci.ics.jung.graph.util.Pair;
 
 public class Corelation <V,E> {
 	
 	private UndirectedSparseGraph<V, E> graph;
+	private MetricData<V, E> data;
 	private double pearsons;
 	private double spearmans;
 	
-	DegreeScorer<V> ds;
-	BetweennessCentrality<V, E> bc;
-	ClosenessCentrality<V, E> cc;
-	EigenvectorCentrality<V, E> ec;
 	
 	public double getPearsons() {
 		return pearsons;
@@ -29,13 +21,21 @@ public class Corelation <V,E> {
 		return spearmans;
 	}
 	
-	public Corelation(UndirectedSparseGraph<V, E> graph, Metrics m) {
+	public Corelation(UndirectedSparseGraph<V, E> graph) {
 		this.graph=graph;
+		data=new MetricData(graph);
+		
+	}
+	
+	public void calculate(Metrics m) {
+		long startTime=System.currentTimeMillis();
 		corellations(m);
+		long endTime = System.currentTimeMillis();
+		System.out.println("Time of work="+ (endTime - startTime)/1000 + "seconds");
+
 	}
 
 	private void corellations(Metrics m) {
-		metrics(m);
 		double[] x = new double[graph.getEdgeCount() * 2];
 		double[] y = new double[graph.getEdgeCount() * 2];
 		int counter = 0;
@@ -43,7 +43,6 @@ public class Corelation <V,E> {
 			Pair<V> pair=graph.getEndpoints(e);
 			V v1 = pair.getFirst();
 			V v2 = pair.getSecond();
-			
 			x[counter] = metric(v1,m);
 			y[counter] = metric(v2,m);
 			++counter;
@@ -60,32 +59,16 @@ public class Corelation <V,E> {
 		spearmans=sc.correlation(x, y);
 	}
 	
-	private void metrics(Metrics m) {
-		switch (m) {
-		case DEGREE: 
-			ds=new DegreeScorer<V>(graph);
-		case BETWEENNESS:
-			bc=new BetweennessCentrality<V,E>(graph);
-		case CLOSENESS:
-			cc=new ClosenessCentrality<V,E>(graph);
-		case EIGEN:
-			ec=new EigenvectorCentrality<V, E>(graph);
-		default:
-			return;
-		}
-		
-	}
-	
 	private double metric(V v,Metrics m) {
 			switch (m) {
 			case DEGREE: 
-				return ds.getVertexScore(v);
+				return data.getDs(v);
 			case BETWEENNESS:
-				return bc.getVertexScore(v);
+				return data.getBc(v);
 			case CLOSENESS:
-				return cc.getVertexScore(v);
+				return data.getCc(v);
 			case EIGEN:
-				return ec.getVertexScore(v);
+				return data.getEc(v);
 			default:
 				return 0.0;
 			}

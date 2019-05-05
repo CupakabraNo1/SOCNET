@@ -4,5 +4,6 @@ public enum Metrics {
 	DEGREE,
 	BETWEENNESS,
 	CLOSENESS,
-	EIGEN	
+	EIGEN;
+	
 }
