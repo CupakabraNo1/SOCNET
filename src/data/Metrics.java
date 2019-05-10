@@ -1,4 +1,4 @@
-package zadatak2;
+package data;
 
 public enum Metrics {
 	DEGREE,

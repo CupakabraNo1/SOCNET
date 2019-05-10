@@ -1,4 +1,4 @@
-package zadatak2;
+package calculations;
 
 import edu.uci.ics.jung.algorithms.scoring.BetweennessCentrality;
 import edu.uci.ics.jung.algorithms.scoring.ClosenessCentrality;
@@ -17,26 +17,28 @@ public class MetricData<V,E> {
 	
 	public MetricData(UndirectedSparseGraph<V, E>graph) {
 		this.graph=clone(graph);
+		System.out.println("Calculating metrics...");
 		calculate();
+		System.out.println("Metrics calculated.");
 	}
 	
 	private void calculate() {
 		long bT=System.currentTimeMillis();
 		ds=degree(graph);
 		long eT=System.currentTimeMillis();
-		System.out.println("Time of calculating degree="+ (eT - bT)/1000 + "seconds");
+		System.out.println("Time of calculating degree="+ (eT - bT)/1000 + " seconds");
 		bT=System.currentTimeMillis();
 		bc=betweenness(graph);
 		eT=System.currentTimeMillis();
-		System.out.println("Time of calculating betweennes="+ (eT - bT)/1000 + "seconds");
+		System.out.println("Time of calculating betweennes="+ (eT - bT)/1000 + " seconds");
 		bT=System.currentTimeMillis();
 		cc=closeness(graph);
 		eT=System.currentTimeMillis();
-		System.out.println("Time of calculating closeness="+ (eT - bT)/1000 + "seconds");
+		System.out.println("Time of calculating closeness="+ (eT - bT)/1000 + " seconds");
 		bT=System.currentTimeMillis();
 		ec=eigen(graph);	
 		eT=System.currentTimeMillis();
-		System.out.println("Time of calculating eigen="+ (eT - bT)/1000 + "seconds");
+		System.out.println("Time of calculating eigen="+ (eT - bT)/1000 + " seconds");
 	}
 	
 	public UndirectedSparseGraph<V, E> getGraph(){
@@ -48,6 +50,10 @@ public class MetricData<V,E> {
 	
 	public double getBc(V v) {
 		return bc.getVertexScore(v);
+	}
+	
+	public double getBcL(E e) {
+		return bc.getEdgeScore(e);
 	}
 	
 	public double getCc(V v) {

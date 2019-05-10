@@ -1,4 +1,4 @@
-package zadatak2;
+package calculations;
 
 import java.util.Collection;
 import java.util.HashSet;
@@ -8,7 +8,7 @@ import java.util.Set;
 import edu.uci.ics.jung.graph.UndirectedSparseGraph;
 import edu.uci.ics.jung.graph.util.Pair;
 
-public class Gigant <V,E> {
+public class Giant <V,E> {
 	
 	private UndirectedSparseGraph<V, E> graph;
 	private Set<Set<V>> components;
@@ -16,13 +16,13 @@ public class Gigant <V,E> {
 	private int graphSize;
 	private Set<V> giga;
 	
-	public Gigant(UndirectedSparseGraph<V, E>graph){
+	public Giant(UndirectedSparseGraph<V, E>graph){
 		this.graph=graph;
 		graphSize=graph.getVertexCount();
 		visited=new HashSet<>();
 		components=new HashSet<>();
 		fromGraph();
-		giga=gigant();
+		giga=giant();
 	}
 	
 	private void fromGraph () {
@@ -51,7 +51,7 @@ public class Gigant <V,E> {
 		}
 	}
 	
-	public Set<V> gigant() {
+	public Set<V> giant() {
 		Set<V> giga=null;
 		for(Set<V> s:components) {
 			if(giga==null || s.size()>giga.size() )
@@ -67,9 +67,12 @@ public class Gigant <V,E> {
 	
 	public double percent() {
 		double perc=0.0;
-		if(giga!=null)
+		if(giga!=null) {
 			perc=(double)(100*giga.size())/(double)graphSize;
-		return perc;
+			return perc;
+		}else {
+			return Double.NaN;
+		}
 	}
 	
 	public int numberOfComponents() {
@@ -78,14 +81,6 @@ public class Gigant <V,E> {
 	
 	public int numberOfOEComponents() {
 		return (int)components.stream().filter(x->x.size()==1).count();
-	}
-	
-	public int isolated() {
-		return (int) components.stream()
-				.filter(x->x.size()==1)
-				.flatMap(x->x.stream())
-				.filter(v->graph.getIncidentEdges(v).size()==0)
-				.count();
 	}
 	
 	public int[] gigaStats() {

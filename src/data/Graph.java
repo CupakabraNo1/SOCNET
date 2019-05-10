@@ -1,4 +1,4 @@
-package zadatak2;
+package data;
 
 import java.io.IOException;
 import java.util.Arrays;

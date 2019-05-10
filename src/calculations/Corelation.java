@@ -1,7 +1,9 @@
-package zadatak2;
+package calculations;
 
 import org.apache.commons.math3.stat.correlation.PearsonsCorrelation;
 import org.apache.commons.math3.stat.correlation.SpearmansCorrelation;
+
+import data.Metrics;
 import edu.uci.ics.jung.graph.UndirectedSparseGraph;
 import edu.uci.ics.jung.graph.util.Pair;
 
@@ -21,9 +23,10 @@ public class Corelation <V,E> {
 		return spearmans;
 	}
 	
-	public Corelation(UndirectedSparseGraph<V, E> graph) {
-		this.graph=graph;
-		data=new MetricData(graph);
+	public Corelation(MetricData<V, E> data) {
+		this.data=data;
+		this.graph=data.getGraph();
+		
 		
 	}
 	
